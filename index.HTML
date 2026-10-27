@@ -1,0 +1,186 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PawMart | Pet Shop</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      color: #26352d;
+      background: #fffdf8;
+    }
+    header {
+      background: #205c45;
+      color: white;
+      padding: 20px 7%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    header h2 { margin: 0; }
+    header a { color: white; text-decoration: none; }
+    .hero {
+      padding: 65px 7%;
+      background: #e5f2df;
+      text-align: center;
+    }
+    .hero h1 { font-size: clamp(32px, 5vw, 52px); margin: 0 0 15px; }
+    .hero p { font-size: 18px; }
+    .hero a {
+      display: inline-block;
+      background: #205c45;
+      color: white;
+      padding: 13px 24px;
+      border-radius: 8px;
+      text-decoration: none;
+      margin-top: 12px;
+    }
+    main { padding: 40px 7%; }
+    .products {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 22px;
+    }
+    .card {
+      background: white;
+      border: 1px solid #e6e9e1;
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 4px 15px #253b2910;
+    }
+    .card img {
+      width: 100%;
+      height: 175px;
+      object-fit: cover;
+      border-radius: 10px;
+      background: #f2f2ec;
+    }
+    .card h3 { margin-bottom: 8px; }
+    .price { font-weight: bold; color: #205c45; }
+    button {
+      background: #205c45;
+      color: white;
+      border: 0;
+      border-radius: 7px;
+      padding: 11px 15px;
+      cursor: pointer;
+    }
+    button:hover { background: #164431; }
+    .cart {
+      background: #f0f5eb;
+      padding: 22px;
+      margin-top: 35px;
+      border-radius: 12px;
+    }
+    footer {
+      background: #205c45;
+      color: white;
+      text-align: center;
+      padding: 22px;
+      margin-top: 25px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h2>🐾 PawMart</h2>
+    <a href="#cart">🛒 Cart (<span id="count">0</span>)</a>
+  </header>
+
+  <section class="hero">
+    <h1>Everything Your Pet Loves ❤️</h1>
+    <p>Quality food, toys and accessories for your furry friends.</p>
+    <a href="#shop">Explore Products</a>
+  </section>
+
+  <main>
+    <h2 id="shop">Our Best Sellers 🐶</h2>
+    <div class="products" id="products"></div>
+
+    <section class="cart" id="cart">
+      <h2>🛒 Your Shopping Cart</h2>
+      <div id="cart-items">Your cart is empty.</div>
+      <h3>Total: ₹<span id="total">0</span></h3>
+      <button onclick="checkout()">Place Order</button>
+      <p id="message" aria-live="polite"></p>
+    </section>
+  </main>
+
+  <footer>
+    <p>🐾 PawMart — Made with love for pets.</p>
+  </footer>
+
+  <script>
+    const products = [
+      {id: 1, name: "Premium Dog Food", price: 799,
+       image: "https://images.unsplash.com/photo-1589924691995-400dc9ecc119?w=500"},
+      {id: 2, name: "Cat Food", price: 499,
+       image: "https://images.unsplash.com/photo-1589924691995-400dc9ecc119?w=500"},
+      {id: 3, name: "Pet Play Toy", price: 249,
+       image: "https://images.unsplash.com/photo-1545249390-6b99b8b8b8b8?w=500"},
+      {id: 4, name: "Pet Accessories", price: 399,
+       image: "https://images.unsplash.com/photo-1601758123927-196b8e7c9b36?w=500"}
+    ];
+
+    const cart = {};
+
+    function renderProducts() {
+      document.getElementById("products").innerHTML =
+        products.map(p => `
+          <article class="card">
+            <img src="${p.image}" alt="${p.name}"
+                 loading="lazy"
+                 onerror="this.style.display='none'">
+            <h3>${p.name}</h3>
+            <p class="price">₹${p.price}</p>
+            <button onclick="addToCart(${p.id})">Add to Cart</button>
+          </article>
+        `).join("");
+    }
+
+    function addToCart(id) {
+      cart[id] = (cart[id] || 0) + 1;
+      renderCart();
+    }
+
+    function renderCart() {
+      const items = products.filter(p => cart[p.id]);
+      document.getElementById("count").textContent =
+        Object.values(cart).reduce((a, b) => a + b, 0);
+
+      document.getElementById("cart-items").innerHTML =
+        items.length ? items.map(p => `
+          <p>${p.name} × ${cart[p.id]} — ₹${p.price * cart[p.id]}
+          <button onclick="removeItem(${p.id})">Remove one</button></p>
+        `).join("") : "Your cart is empty.";
+
+      document.getElementById("total").textContent =
+        items.reduce((sum, p) => sum + p.price * cart[p.id], 0);
+    }
+
+    function removeItem(id) {
+      if (cart[id] > 1) cart[id]--;
+      else delete cart[id];
+      renderCart();
+    }
+
+    function checkout() {
+      const message = document.getElementById("message");
+      if (!Object.keys(cart).length) {
+        message.textContent = "Please add a product first!";
+        return;
+      }
+      message.textContent =
+        "Cart ready! Connect a backend or WhatsApp ordering to receive real orders.";
+    }
+
+    renderProducts();
+  </script>
+</body>
+</html>
